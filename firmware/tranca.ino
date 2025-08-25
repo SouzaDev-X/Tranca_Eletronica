@@ -18,20 +18,24 @@ byte colPins[COLS] = {6,7,8,9};
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 // ===================
-// Configuração do Servo
+// Configuração do Servo e LEDs
 // ===================
 Servo servo;
 const byte SERVO_PIN = 10;
 const int FECHADO = 0;
 const int ABERTO = 90;
 
+// LEDs virtuais no Wokwi
+const byte LED_VERDE = 11;   // aberto
+const byte LED_VERMELHO = 12; // fechado
+
 // ===================
 // Constantes do Projeto
 // ===================
-const char SENHA[] = "1234";  
+const char SENHA[] = "5555";  
 const byte TAM = 4;            
-const byte TENT_MAX = 3;       
-const unsigned long BLOQ_MS = 10000; 
+const byte TENT_MAX = 1;       
+const unsigned long BLOQ_MS = 20000; 
 
 // ===================
 // Variáveis de Estado
@@ -43,14 +47,22 @@ bool bloqueado = false;
 unsigned long tBloq = 0;   
 
 // ===================
-// Função para abrir a tranca
+// Função para abrir a tranca com LEDs
 // ===================
 void abrirTranca() {
+  // Abrir servo
   servo.write(ABERTO);
   Serial.println("ABERTO");
-  delay(3000);            // tempo aberto
+  digitalWrite(LED_VERDE, HIGH);
+  digitalWrite(LED_VERMELHO, LOW);
+
+  delay(10000); // tempo aberto (ajustado para testes)
+
+  // Fechar servo
   servo.write(FECHADO);
   Serial.println("FECHADO");
+  digitalWrite(LED_VERDE, LOW);
+  digitalWrite(LED_VERMELHO, HIGH);
 }
 
 // ===================
@@ -60,6 +72,11 @@ void setup() {
   Serial.begin(9600);
   servo.attach(SERVO_PIN);
   servo.write(FECHADO); 
+  pinMode(LED_VERDE, OUTPUT);
+  pinMode(LED_VERMELHO, OUTPUT);
+  digitalWrite(LED_VERDE, LOW);
+  digitalWrite(LED_VERMELHO, HIGH); // começa fechado
+
   Serial.println("Simulação Tranca Eletrônica Iniciada");
 }
 
@@ -121,7 +138,7 @@ void loop() {
           if(tentativas >= TENT_MAX){
             bloqueado = true;
             tBloq = millis();
-            Serial.println("Máximo de tentativas atingido. Bloqueio 10s.");
+            Serial.println("Máximo de tentativas atingido. Bloqueio 20s.");
           }
         }
       } else {
